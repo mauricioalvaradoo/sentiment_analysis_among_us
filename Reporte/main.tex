@@ -5,34 +5,74 @@
 % Treebank (SST-2). El dataset se puede acceder desde  el siguiente url:
 % https://huggingface.co/datasets/mrm8488/sst2-es-mt
 
-
 \begin{document}
-
+\maketitle
 
 
 \section{Motivación}
-% Explicar el app y el motivo para escogerlo, rango de fechas de los comentarios
+% Explicar el app
+\textit{Among Us} es un videojuego multijugador en línea desarrollado por la compañía estadounidense \textit{InnerSloth}. Fue lanzado en 2018 con poco recibimiento. No obstante, el juego alcanzó una enorme popularidad en 2020 durante la pandemia de COVID-19, convirtiéndose en uno de los juegos más jugados del año.
+
+La historia de \textit{Among Us} se desarrolla en una nave espacial, donde los jugadores asumen el papel de miembros de la tripulación o impostores que intentan sabotear la misión. Los jugadores trabajan juntos para mantener la nave en funcionamiento mientras completan tareas, pero algunos jugadores son impostores cuyo objetivo es sabotear y matar a los demás jugadores sin ser descubiertos. A medida que los jugadores completan tareas, también investigan los asesinatos y acusan a otros jugadores de ser los impostores. Estos deben utilizar la estrategia y la comunicación para determinar quién es el impostor y votar para expulsarlo de la nave.
+
+% Motivo para escogerlo
+Pese a que el juego aún cuenta con mucha popularidad y recibió muchas mejoras de parte de los desarrolladores, durante los primeros meses de la pandemia el juego contaba con muchos errores y caídas en sus servidores debido a la alta demanda. Esto llevó a muchas personas a calificar el juego de manera negativa. Actualmente cuenta con una calificación de 3.8 en \textit{Google Play Store}, lo cual lo posiciona muy por debajo de muchos juegos de igual o menor popularidad. Por ello, lo que motiva a este proyecto es poder clasificar los comentarios de un juego muy popular y de mis favoritos del 2020, que actualmente ha solucionado gran parte de sus problemas, pero que aún cuenta con una calificación muy baja.
+
+% Rango de fechas de los comentarios
+Se tomará en cuenta los cinco mil comentarios más actuales en castellano y en Perú. La última actualización es considerando los comentarios hasta la fecha de 22 de febrero del 2023.
+
 
 \section{Hechos estilizados}
 % Indicar estadísticas (total de comentarios, cantidad de símbolos y palabras)
 % Frecuencia de palabras condicional (por score)
 % Identificar cantidad de verbos y adjetivos en los comentarios
 % ¿Qué personas u organizaciones son mencionados en los comentarios?
+.
+.
+.
+.
 
 \section{Metodología}
+
+%% Explicar que los modelos son solo para entrenamiento y testeo previo a usarlo con los comentarios!!! Este primer ejercicio fue con otros datos!!!!!!!!!!!!!!!!!!!!!!!!!
+
+\subsection{Modelos}
+Se consideraron dos algoritmos de \textit{machine learning} (\textit{ML}) y dos  arquitecturas neuronales de \textit{deep learning} (\textit{DL}). Cada uno corresponde a un modelo, por lo que se estimó 4 modelos diferentes.
+
+Los dos algoritmos considerados para \textit{ML} son los de Regresión Logística y de XGBoost. El primero fue elegido por ser uno de los algoritmos más usados para propuestas simples de clasificación. De hecho, es uno de los primeros algoritmos que se aprenden en diversos cursos a lo largo del mundo. El segundo fue elegido por ser uno de los algoritmos preferidos por muchos \textit{data scientists} por su gran rendimiento en términos de eficiencia, ajuste y aprendizaje\footnote{Para más detalle sobre sus ventajas y razones de su gran popularidad, se puede revisar lo siguiente: \url{https://www.analyticsvidhya.com/blog/2016/03/complete-guide-parameter-tuning-xgboost-with-codes-python/}.}.
+
+Para ambos algoritmos se estimó la mejor versión de estos basado en la selección de los hiperpárametros que maximicen el ajuste con los datos de entrenamiento. Se usó el método \textit{GridSearchCV} que recoge las diferentes combinaciones de hiperparámetros definidos con anterioridad y estima el modelo con 5-Folds mediante \textit{cross-validation}\footnote{Consiste en separar las observaciones de entrenamiento en cinco grupos, estimar con cuatro de estos y reservar el quinto como un \textit{testing} para estimar el ajuste. Tras realizar este ejercicio con las cinco combinaciones posibles, se obtiene cinco métricas de ajuste diferentes que serán promediadas. El objetivo de este ejercicio es corroborar la inexistencia de \textit{overfitting}, lo cual se debería reflejar en métricas de ajuste en los datos de \textit{test} muy similares al de los de entrenamiento.}. Para el caso de Regresión Logística se consideró como parámetros de regularización a 0.001, 0.01, 0.1, 1, 10 y 100. Para el caso del algoritmo de XGBoost se consideró 100, 200 y 500 árboles de decisión; 3, 5 y 7 de profundidad máxima en cada uno de los nodos; y 0.1, 0.01 y 0.001 de \textit{learning rate} en cada estimación.
+
+Para el caso los algoritmos de \textit{DL}, se propuso dos arquitecturas neuronales que cuentan con capas de \textit{embedding}, \textit{convolucionales}, \textit{dropout}, \textit{pooling} y \textit{densas}. La primera estructura será llamada “intermedia” y la segunda será llamada “compleja”. La primera consiste de 
+
+\subsection{Comparativa entre modelos}
+
 % o	Entrenar al menos 2 algoritmos (1 tradicional y 1 profundo) que pueda identificar
 % el sentimiento del comentario (positivo, negativo). Aplicar pre-procesamiento y
 % vectorización de texto.
+.
 
 \section{Selección de modelo}
 % Explicar el proceso del entrenamiento y de las pruebas (porqué escogieron esos
 % algoritmos, qué métricas usaron y sus valores, cual obtuvo el mejor performance,
 % problemas que se presentaron, etc.)
+.
 
 \section{Resultados}
 % Brindar conclusiones
-\section{Conclusiones}
+.
 
+\section{Conclusiones}
+.
+
+
+
+\newpage
+%\begin{thebibliography}{99}
+	
+%\bibitem {} Autor. (Año). Título. \textit{Revista} \textbf{Volumen(Numero),} Institución.
+
+%\end{thebibliography}
 
 
 

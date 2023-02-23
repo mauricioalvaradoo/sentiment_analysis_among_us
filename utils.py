@@ -25,6 +25,7 @@ def processing(y):
 
     # Quitar stopwords y punct [list]
     y = y.apply(lambda obs: [w.lower() for w in obs])
+    y = y.apply(lambda obs: [w for w in obs if w.isalpha()])
     y = y.apply(lambda obs: [w for w in obs if w not in stops])
     y = y.apply(lambda obs: [w for w in obs if w not in punctuations])
 

@@ -1,25 +1,28 @@
 import pandas as pd
 import pickle
+import gzip
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from xgboost import XGBClassifier
-from sklearn.svm import SVC
 import tensorflow as tf
 
 from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score,
-    classification_report, confusion_matrix, ConfusionMatrixDisplay,
-    roc_curve
+    accuracy_score, log_loss, f1_score,
+    classification_report, confusion_matrix, roc_curve
 )
 
 import utils
 
+import warnings
+warnings.simplefilter("ignore")
+
+
 
 # Importación
-df_train       = pd.read_pickle('Data/df_train_raw.pkl')
-df_test        = pd.read_pickle('Data/df_test_raw.pkl')
+df_train = pd.read_pickle('Data/df_train_raw.pkl')
+df_test  = pd.read_pickle('Data/df_test_raw.pkl')
 
 # Definición de elementos
 X_train = df_train['comments']
@@ -28,8 +31,8 @@ X_test  = df_test['comments']
 y_test  = df_test['label']
 
 # Procesando los textos
-X_train        = utils.processing(X_train)
-X_test         = utils.processing(X_test)
+X_train = utils.processing(X_train)
+X_test  = utils.processing(X_test)
 
 # Vectorización -> Asociado a X_train
 vectorizer  = TfidfVectorizer(
@@ -47,107 +50,181 @@ with open('Data/vectorizer.pkl', 'wb') as f:
 
 
 
-## Modelos ##################################################################
+## Modelos ####################################################################
 """
 Se comparará algoritmos de ML y estructuras de DL.
-La comparativa se hará mediante MAPE y ajuste.
-Los mejores modelos por algoritmo serán tomados por GridSearchCV.
+Se buscará estimar el mejor modelo. Si se requiere, se usará GridSearchCV.
+La comparativa se hará mediante logloss, f1-score, ajuste, curva ROC.
 
-Machine Learning
+Machine Learning:
 * (1) Regresión Logística
 * (2) XGBoost
-* (3) SVM
 
 Deep Learning:
-* (4)
-* (5)
-* (6)
+* (3) Red Neuronal 1: Intermedia
+    + Embedding: 10 000 dimensiones en vocabulario
+    + Convolucional: 32 núcleos
+    + DropOut: 0.6
+    + Pooling: Max
+    + Dropout: 0.2
+    + Densa: 64 neuronas
+    + Densa: 1 neurona
 
+* (4) Red Neuronal 2: Compleja
+    + Embedding: 20 000 dimensiones en vocabulario
+    + Convolucional: 64 núcleos
+    + DropOut: 0.8
+    + Pooling: Max
+    + Dropout: 0.2
+    + Densa: 64 neuronas
+    + Densa: 32 neuronas
+    + Densa: 1 neurona
+    
+Todas con 50 epochs.
+Acaba la estimación si se alcanza 0.01 de error o 99.5% de ajuste
 
 """
 
 
-# (1) Regresión Logística ###################################################
-lr = LogisticRegression(random_state=19).fit(X_train, y_train)
+
+
+# (1) Regresión Logística #####################################################
+params = {
+    'C': [0.001, 0.01, 0.1, 1, 10, 100]  # Regularización
+}
+
+lr = GridSearchCV(LogisticRegression(), param_grid=params, cv=5, verbose=2)\
+    .fit(X_train, y_train)
 yhat_proba_lr = lr.predict_proba(X_test)[:,1]
-yhat_lr = lr.predict(X_test)
+yhat_lr       = lr.predict(X_test)
+
+print('Hiperparámetros\t:', lr.best_params_)
+print('Ajuste\t:',          lr.best_score_)
 
 # Estadisticos
 score_lr = accuracy_score(y_test, yhat_lr)
-ps_lr = precision_score(y_test, yhat_lr)
-r_lr = recall_score(y_test, yhat_lr)
-f1_lr = f1_score(y_test, yhat_lr)
+loss_lr  = log_loss(y_test, yhat_lr)
+f1_lr    = f1_score(y_test, yhat_lr)
 
 # Confusion matrix y ROC
-conf_lr = confusion_matrix(y_test, yhat_lr, normalize="true")
+conf_lr   = confusion_matrix(y_test, yhat_lr, normalize='true')
 report_lr = classification_report(y_test, yhat_lr)
 flr, tlr, thresholds = roc_curve(y_test, yhat_proba_lr)
 
 
 
-# (2) XGBoost ################################################################
-xgb = XGBClassifier(use_label_encoder=False, eval_metric = "mlogloss", random_state = 19)\
+
+# (2) XGBoost #################################################################
+params = {
+    'n_estimators':  [100, 200, 500],  # Cantidad de árboles
+    'max_depth':     [3, 5, 7],        # Máxima profundida de árboles
+    'learning_rate': [0.01, 0.001]     # Learning rate
+}
+
+xgb = GridSearchCV(XGBClassifier(), param_grid=params, cv=5, verbose=2)\
     .fit(X_train, y_train)
 yhat_proba_xgb = xgb.predict_proba(X_test)[:,1]
 yhat_xgb = xgb.predict(X_test)
 
+print('Hiperparámetros\t:', xgb.best_params_)
+print('Ajuste\t:',          xgb.best_score_)
+
 # Estadisticos
 score_xgb = accuracy_score(y_test, yhat_xgb)
-ps_xgb = precision_score(y_test, yhat_xgb)
-r_xgb = recall_score(y_test, yhat_xgb)
-f1_xgb = f1_score(y_test, yhat_xgb)
+loss_xgb  = log_loss(y_test, yhat_xgb)
+f1_xgb    = f1_score(y_test, yhat_xgb)
 
 # Confusion matrix y ROC
-conf_xgb = confusion_matrix(y_test, yhat_xgb, normalize="true")
+conf_xgb = confusion_matrix(y_test, yhat_xgb, normalize='true')
 report_xgb = classification_report(y_test, yhat_xgb)
 fxgb, txgb, thresholds = roc_curve(y_test, yhat_proba_xgb)
 
 
-# (3) SVM ####################################################################
-svm_grid_search = SVC()
 
-param_grid = {
-    'C': [0.1, 1, 10, 100],
-    'gamma': [1, 0.1],
-    'kernel': ['rbf'],
-    'probability': [True],
-    'random_state': [19]
-}
 
-grid = GridSearchCV(
-    svm_grid_search, param_grid, cv = 5, scoring = "accuracy",
-    verbose = 10, n_jobs = -1
+# (3) Red Neuronal 1 ##########################################################
+rn1 = tf.keras.Sequential(
+    [
+        tf.keras.layers.Embedding(5_000, 64),
+        tf.keras.layers.Conv1D(32, 3, activation='relu'),
+        tf.keras.layers.Dropout(0.6), 
+        tf.keras.layers.GlobalAveragePooling1D(),
+        tf.keras.layers.Dropout(0.2), 
+        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dense(1, activation='sigmoid')
+    ]
 )
 
-svm = grid.fit(X_train, y_train)
-yhat_proba_svm = svm.predict_proba(X_test)[:,1]
-yhat_svm = svm.predict(X_test)
+rn1.compile(
+    loss = tf.keras.losses.BinaryCrossentropy(),
+    optimizer = tf.keras.optimizers.Adam(0.001),
+    metrics = ["logcosh", "accuracy"]
+)
 
-# Estadisticos
-score_svm = accuracy_score(y_test, yhat_svm)
-ps_svm = precision_score(y_test, yhat_svm)
-r_svm = recall_score(y_test, yhat_svm)
-f1_svm = f1_score(y_test, yhat_svm)
+rn1.fit(
+    X_train, y_train, epochs=100,
+    validation_data=(X_test, y_test),
+    verbose=2
+)
 
-# Confusion matrix y ROC
-conf_svm = confusion_matrix(y_test, yhat_svm, normalize="true")
-report_svm = classification_report(y_test, yhat_svm)
-fsvm, tsvm, thresholds = roc_curve(y_test, yhat_proba_svm)
-
-
+# Evaluación
+scores = rn1.evaluate(X_test, y_test, verbose=0)
 
 
-# (4) Red Neuronal 1 #########################################################
-model = tf.keras.Sequential([
-    tf.keras.layers.Embedding(10_000, 64),
-    tf.keras.layers.Conv1D(100, 3, activation='relu'),
-    tf.keras.layers.Dropout(0.8), 
-    tf.keras.layers.GlobalAveragePooling1D(),
-    tf.keras.layers.Dropout(0.2), 
-    tf.keras.layers.Dense(64, activation='relu'),
-    tf.keras.layers.Dense(2, activation='sigmoid')
-])
 
-model.compile(loss='sparse_categorical_crossentropy', optimizer = 'Adam', metrics=['accuracy'])
-model.fit(X_train, y_train, epochs=100, validation_data=(X_test, y_test), verbose=2)
+
+# (4) Red Neuronal 2 ##########################################################
+rn2 = tf.keras.Sequential(
+    [
+        tf.keras.layers.Embedding(10_000, 64),
+        tf.keras.layers.Conv1D(32, 3, activation='relu'),
+        tf.keras.layers.Dropout(0.8), 
+        tf.keras.layers.GlobalAveragePooling1D(),
+        tf.keras.layers.Dropout(0.2), 
+        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dense(32, activation='relu'),
+        tf.keras.layers.Dense(1, activation='sigmoid')
+    ]
+)
+
+rn2.compile(
+    loss = tf.keras.losses.BinaryCrossentropy(),
+    optimizer = tf.keras.optimizers.Adam(0.001),
+    metrics = ["logcosh", "accuracy"]
+)
+
+rn2.fit(
+    X_train, y_train, epochs=100,
+    validation_data=(X_test, y_test),
+    verbose=2
+)
+
+# Evaluación
+scores = rn2.evaluate(X_test, y_test, verbose=0)
+
+
+
+
+# Comparativa #################################################################
+
+
+
+
+
+
+
+
+
+
+
+# Guardando modelos ###########################################################
+with gzip.open('Modelos/lr.pklz', 'wb') as f:                 # Logistic Reg
+    pickle.dump(lr, f, protocol=pickle.HIGHEST_PROTOCOL)
+with gzip.open('Modelos/xgb.pklz', 'wb') as f:                # XGBoost
+    pickle.dump(xgb, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+# Las redes neuronales serán guardadas con su propio método 'save' debido a que
+# tensorflow maneja su propio estilo de serialización.
+rn1.save('Modelos/rn1.h5') 
+rn2.save('Modelos/rn2.h5') 
 

@@ -1,65 +1,62 @@
-\documentclass[12pt, a4paper]{article}
-\usepackage[spanish,activeacute]{babel}
+\documentclass[11pt, onecolumn]{article}
+\usepackage[spanish, activeacute]{babel}
 \usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{helvet} % Importando helvética
-\renewcommand*\familydefault{\sfdefault} % Arial
 
-\usepackage{apacite}
-\usepackage{natbib} % Natbib
 
-\usepackage{geometry}
-\newgeometry{bottom=2.5cm, top=4cm, left=2.5cm, right=2.5cm}
+% Letra
+\usepackage{amsfonts}
+\topmargin 10pt
+\advance \topmargin by -\headheight
+\advance \topmargin by -\headsep
+\textheight 8.5in
+\oddsidemargin -0pt
+\evensidemargin \oddsidemargin
+\marginparwidth 0.5in
+\textwidth 6.5in
+\let \large=\normalsize
+\let \Large=\large
+\let \tilde=\widetilde
 
-\usepackage{ragged2e}
-\renewcommand{\baselinestretch}{1.25}
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{6mm}
+% Hipervínculos
+\usepackage[
+colorlinks = True,
+linkcolor = blue,
+filecolor = blue
+urlcolor = blue,
+citecolor = blue
+]{hyperref}
 
-\setlength{\skip\footins}{1.5cm}
-\setlength{\footnotesep}{0.5cm}
-
-\usepackage{graphicx}
-\usepackage[font=small,labelfont=bf]{caption}
-\usepackage[skip=0pt]{subcaption} \captionsetup[subfigure]{labelformat=empty}
-\usepackage{float}
-\usepackage{booktabs}
-\usepackage[dvipsnames]{xcolor}
-
+% Matemática
 \usepackage{amsmath}
+\usepackage{amssymb}
+\newtheorem{theorem}{Theorem}
+\newtheorem{Assumption}{Assumption}
+\newtheorem{lemma}{Lemma}
+\newtheorem{problem}{Property}
+\newtheorem{proposition}{Proposition}
+\newenvironment{proof}[1][Proof]{\textbf{#1.} }{\rule{0.5em}{0.5em}}
 
-\usepackage[colorlinks = True, linkcolor = blue, urlcolor = blue, citecolor = blue]{hyperref}
-\usepackage{xurl}
+% Tablas y figuras
+\usepackage{multicol}%
+\setcounter{MaxMatrixCols}{30}
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.pdf,.eps,.ps,.png,.jpg,.jpeg}
+\renewcommand{\arraystretch}{.5}
+\newtheorem{corollary}{Corollary}
+\renewcommand{\arraystretch}{1.5}
+\usepackage{lscape}
+\providecommand{\U}[1]{\protect\rule{.1in}{.1in}}
+\graphicspath{{uno_graphics/}{uno_tcache/}{uno_gcache/}}
+\providecommand{\U}[1]{\protect \rule{.1in}{.1in}}
 
+% Citado
+\usepackage{harvard}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatletter
+\makeatother
 
+% Datos
 \title{Análisis de sentimientos en comentarios de Among Us}
 \author{Mauricio Alvarado}
-\subtitle{Reporte}
 \date{\today}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Referencias/Bibliografía
-
-%\usepackage[babel]{csquotes}
-%\usepackage[backend=biber,style=apa]{biblatex}
-%\renewcommand*{\bibfont}{\normalfont\scriptsize} % Cambiar tamaño del texto
-%\setlength\bibitemsep{1.5\itemsep} % Separación entre cada referencia
-%\DeclareLanguageMapping{spanish}{spanish-apa}
-%\addbibresource{<<ruta>>} % Importando biblio
-%\nocite{*} % Incluir las que no se citó
-
-% Dentro del main se debe colocar: \printbibliography
-% https://tex.stackexchange.com/questions/131518/help-with-citation-in-text-in-parentheses-etc-with-biblatex-apa
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Paquetes adicionales:___________________________________________________
-% Para tablas complejas se puede usar la página: https://www.tablesgenerator.com/
-% Para cortar tablas, el paquete: \usepackage{multicol}
-% Para tablas que abarcan más de dos páginas: \usepackage{longtable}
-% Para páginas rotar páginas, sin rotar en enunciado: \usepackage{pdflscape}, usar comando: {landscape}
-% Colores de fondos, textos, entre otros: \usepackage{color}
-% Para cargar imágenes de pdfs: \usepackage{pdfpages}
 

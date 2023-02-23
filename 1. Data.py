@@ -37,7 +37,7 @@ comments = gplay.reviews(
     lang = 'es',                 # language
     sort = gplay.Sort.NEWEST,    # más reciente a más antiguo
     country = 'pe',              # país
-    count = 1_000                # observaciones
+    count = 5_000                # observaciones
 )[0]
 
 
