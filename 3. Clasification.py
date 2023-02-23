@@ -13,7 +13,7 @@ X_to_classify  = df_to_classify['comments']
 
 
 # Procesamiento y vectorización
-X_to_classify  = utils.processing(X_to_classify)
+X_to_classify  = utils.preprocess(X_to_classify)
 X_to_classify  = vectorizer.transform(X_to_classify).toarray()
 
 

@@ -20,6 +20,7 @@ warnings.simplefilter("ignore")
 
 
 
+
 # Importación
 df_train = pd.read_pickle('Data/df_train_raw.pkl')
 df_test  = pd.read_pickle('Data/df_test_raw.pkl')
@@ -31,8 +32,8 @@ X_test  = df_test['comments']
 y_test  = df_test['label']
 
 # Procesando los textos
-X_train = utils.processing(X_train)
-X_test  = utils.processing(X_test)
+X_train = utils.preprocess(X_train)
+X_test  = utils.preprocess(X_test)
 
 # Vectorización -> Asociado a X_train
 vectorizer  = TfidfVectorizer(
@@ -47,6 +48,7 @@ X_test  = vectorizer.transform(X_test).toarray()
 # Guardado el vectorizador
 with open('Data/vectorizer.pkl', 'wb') as f:
     pickle.dump(vectorizer, f)
+
 
 
 
@@ -162,13 +164,12 @@ rn1.compile(
 )
 
 rn1.fit(
-    X_train, y_train, epochs=100,
-    validation_data=(X_test, y_test),
-    verbose=2
+    X_train, y_train, epochs=50,
+    validation_data=(X_test, y_test)
 )
 
 # Evaluación
-scores = rn1.evaluate(X_test, y_test, verbose=0)
+# scores = rn1.evaluate(X_test, y_test, verbose=0)
 
 
 
@@ -194,20 +195,19 @@ rn2.compile(
 )
 
 rn2.fit(
-    X_train, y_train, epochs=100,
-    validation_data=(X_test, y_test),
-    verbose=2
+    X_train, y_train, epochs=50,
+    validation_data=(X_test, y_test)
 )
 
 # Evaluación
-scores = rn2.evaluate(X_test, y_test, verbose=0)
+# scores = rn2.evaluate(X_test, y_test, verbose=0)
 
 
 
 
 # Comparativa #################################################################
 
-
+# tf.keras.utils.plot_model(rn1, to_file='rn1.png', show_shapes=True, show_layer_names=True)
 
 
 
@@ -218,9 +218,9 @@ scores = rn2.evaluate(X_test, y_test, verbose=0)
 
 
 # Guardando modelos ###########################################################
-with gzip.open('Modelos/lr.pklz', 'wb') as f:                 # Logistic Reg
+with gzip.open('Modelos/lr.pklz', 'wb') as f:
     pickle.dump(lr, f, protocol=pickle.HIGHEST_PROTOCOL)
-with gzip.open('Modelos/xgb.pklz', 'wb') as f:                # XGBoost
+with gzip.open('Modelos/xgb.pklz', 'wb') as f:
     pickle.dump(xgb, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 # Las redes neuronales serán guardadas con su propio método 'save' debido a que

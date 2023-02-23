@@ -8,7 +8,7 @@ stops = stopwords.words('spanish')
 punctuations = string.punctuation
 
 
-def processing(y):
+def preprocess(y):
     """ Procesamiento de texto
     Parámetros
     --------------
