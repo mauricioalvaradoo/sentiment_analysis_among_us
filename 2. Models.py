@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 import pickle
 import gzip
 
@@ -16,7 +18,7 @@ from sklearn.metrics import (
 import utils
 
 import warnings
-warnings.simplefilter("ignore")
+warnings.simplefilter('ignore')
 
 
 
@@ -27,9 +29,9 @@ df_test  = pd.read_pickle('Data/df_test_raw.pkl')
 
 # Definición de elementos
 X_train = df_train['comments']
-y_train = df_train['label']
+y_train = np.array(df_train['label'])
 X_test  = df_test['comments']
-y_test  = df_test['label']
+y_test  = np.array(df_test['label'])
 
 # Procesando los textos
 X_train = utils.preprocess(X_train)
@@ -37,9 +39,8 @@ X_test  = utils.preprocess(X_test)
 
 # Vectorización -> Asociado a X_train
 vectorizer  = TfidfVectorizer(
-    max_features = 5_000,
-    use_idf = True,
-    ngram_range = (1, 2)
+    max_features = 15_000,
+    use_idf = True
 )
 
 X_train = vectorizer.fit_transform(X_train).toarray()
@@ -56,7 +57,7 @@ with open('Data/vectorizer.pkl', 'wb') as f:
 """
 Se comparará algoritmos de ML y estructuras de DL.
 Se buscará estimar el mejor modelo. Si se requiere, se usará GridSearchCV.
-La comparativa se hará mediante logloss, f1-score, ajuste, curva ROC.
+La comparativa se hará mediante ajuste, logloss, f1-score, curva ROC.
 
 Machine Learning:
 * (1) Regresión Logística
@@ -66,18 +67,14 @@ Deep Learning:
 * (3) Red Neuronal 1: Intermedia
     + Embedding: 10 000 dimensiones en vocabulario
     + Convolucional: 32 núcleos
-    + DropOut: 0.6
     + Pooling: Max
-    + Dropout: 0.2
     + Densa: 64 neuronas
     + Densa: 1 neurona
 
 * (4) Red Neuronal 2: Compleja
     + Embedding: 20 000 dimensiones en vocabulario
     + Convolucional: 64 núcleos
-    + DropOut: 0.8
     + Pooling: Max
-    + Dropout: 0.2
     + Densa: 64 neuronas
     + Densa: 32 neuronas
     + Densa: 1 neurona
@@ -126,7 +123,7 @@ params = {
 xgb = GridSearchCV(XGBClassifier(), param_grid=params, cv=5, verbose=2)\
     .fit(X_train, y_train)
 yhat_proba_xgb = xgb.predict_proba(X_test)[:,1]
-yhat_xgb = xgb.predict(X_test)
+yhat_xgb       = xgb.predict(X_test)
 
 print('Hiperparámetros\t:', xgb.best_params_)
 print('Ajuste\t:',          xgb.best_score_)
@@ -147,11 +144,9 @@ fxgb, txgb, thresholds = roc_curve(y_test, yhat_proba_xgb)
 # (3) Red Neuronal 1 ##########################################################
 rn1 = tf.keras.Sequential(
     [
-        tf.keras.layers.Embedding(5_000, 64),
-        tf.keras.layers.Conv1D(32, 3, activation='relu'),
-        tf.keras.layers.Dropout(0.6), 
-        tf.keras.layers.GlobalAveragePooling1D(),
-        tf.keras.layers.Dropout(0.2), 
+        tf.keras.layers.Embedding(5_000, output_dim=64),
+        tf.keras.layers.Conv1D(64, 3, activation='relu'),
+        tf.keras.layers.GlobalAveragePooling1D(), 
         tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ]
@@ -160,16 +155,27 @@ rn1 = tf.keras.Sequential(
 rn1.compile(
     loss = tf.keras.losses.BinaryCrossentropy(),
     optimizer = tf.keras.optimizers.Adam(0.001),
-    metrics = ["logcosh", "accuracy"]
+    metrics = ['logcosh', 'accuracy']
 )
 
 rn1.fit(
-    X_train, y_train, epochs=50,
+    X_train, y_train, epochs=20,
     validation_data=(X_test, y_test)
 )
 
-# Evaluación
-# scores = rn1.evaluate(X_test, y_test, verbose=0)
+yhat_proba_rn1 = rn1.predict(X_test)
+yhat_rn1       = (yhat_proba_rn1>0.5).astype('int32')
+
+# Estadisticos
+score_rn1 = accuracy_score(y_test, yhat_rn1)
+loss_rn1  = log_loss(y_test, yhat_rn1)
+error_rn1 = np.mean(y_test != yhat_rn1)
+f1_rn1    = f1_score(y_test, yhat_rn1)
+
+# Confusion matrix y ROC
+conf_rn1   = confusion_matrix(y_test, yhat_rn1, normalize='true')
+report_rn1 = classification_report(y_test, yhat_rn1)
+frn1, trn1, thresholds = roc_curve(y_test, yhat_proba_rn1)
 
 
 
@@ -178,10 +184,8 @@ rn1.fit(
 rn2 = tf.keras.Sequential(
     [
         tf.keras.layers.Embedding(10_000, 64),
-        tf.keras.layers.Conv1D(32, 3, activation='relu'),
-        tf.keras.layers.Dropout(0.8), 
+        tf.keras.layers.Conv1D(64, 3, activation='relu'),
         tf.keras.layers.GlobalAveragePooling1D(),
-        tf.keras.layers.Dropout(0.2), 
         tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.Dense(32, activation='relu'),
         tf.keras.layers.Dense(1, activation='sigmoid')
@@ -191,28 +195,123 @@ rn2 = tf.keras.Sequential(
 rn2.compile(
     loss = tf.keras.losses.BinaryCrossentropy(),
     optimizer = tf.keras.optimizers.Adam(0.001),
-    metrics = ["logcosh", "accuracy"]
+    metrics = ['logcosh', 'accuracy']
 )
 
 rn2.fit(
-    X_train, y_train, epochs=50,
+    X_train, y_train, epochs=20,
     validation_data=(X_test, y_test)
 )
 
-# Evaluación
-# scores = rn2.evaluate(X_test, y_test, verbose=0)
+yhat_proba_rn2 = rn2.predict(X_test)
+yhat_rn2       = (yhat_proba_rn2>0.5).astype('int32')
+
+# Estadisticos
+score_rn2 = accuracy_score(y_test, yhat_rn2)
+loss_rn2  = log_loss(y_test, yhat_rn2)
+error_rn2 = np.mean(y_test, yhat_rn2)
+f1_rn2    = f1_score(y_test, yhat_rn2)
+
+# Confusion matrix y ROC
+conf_rn2   = confusion_matrix(y_test, yhat_rn2, normalize='true')
+report_rn2 = classification_report(y_test, yhat_rn2)
+frn2, trn2, thresholds = roc_curve(y_test, yhat_proba_rn2)
+
+
+
+
+# Figuras de las arquitecturas ################################################
+tf.keras.utils.plot_model(
+    rn1, to_file='Figuras/rn1.eps', show_shapes=True, show_layer_names=True
+)
+tf.keras.utils.plot_model(
+    rn1, to_file='Figuras/rn1.pdf', show_shapes=True, show_layer_names=True
+)
+
+tf.keras.utils.plot_model(
+    rn2, to_file='Figuras/rn2.eps', show_shapes=True, show_layer_names=True
+)
+tf.keras.utils.plot_model(
+    rn2, to_file='Figuras/rn2.pdf', show_shapes=True, show_layer_names=True
+)
 
 
 
 
 # Comparativa #################################################################
+## 1. Ajuste
+dict_ajust = {
+    'Regresión Logística': score_lr,
+    'XGBoost': score_xgb,
+    'Red Neuronal 1': score_rn1,
+    'Red Neuronal 2': score_rn2,
+}
 
-# tf.keras.utils.plot_model(rn1, to_file='rn1.png', show_shapes=True, show_layer_names=True)
+df_score = pd.DataFrame(dict_ajust.items(), columns=['Modelo', 'Score']).set_index('Modelo')
+df_score['Score'] = np.round(df_score['Score'], 3)
+df_score = df_score.sort_values('Score', ascending=False)
+
+print(df_score)
 
 
+## 2. LogLoss
+dict_loss = {
+    'Regresión Logística': loss_lr,
+    'XGBoost': loss_xgb,
+    'Red Neuronal 1': loss_rn1,
+    'Red Neuronal 2': loss_rn2,
+}
+
+df_loss = pd.DataFrame(dict_loss.items(), columns=['Modelo', 'LogLoss']).set_index('Modelo')
+df_loss['LogLoss'] = np.round(df_loss['LogLoss'], 3)
+df_loss = df_loss.sort_values('LogLoss', ascending=True)
+
+print(df_loss)
 
 
+## 3. F1-Score
+dict_f1 = {
+    'Regresión Logística': f1_lr,
+    'XGBoost': f1_xgb,
+    'Red Neuronal 1': f1_rn1,
+    'Red Neuronal 2': f1_rn2,
+}
 
+df_f1 = pd.DataFrame(dict_f1.items(), columns=['Modelo', 'F1-Score']).set_index('Modelo')
+df_f1['F1-Score'] = np.round(df_f1['F1-Score'], 3)
+df_f1 = df_f1.sort_values('F1-Score', ascending=False)
+
+print(df_f1)
+
+
+## 4. Curva ROC
+dict_roc = {
+    'Regresión logistica': [flr, tlr],
+    'XGBoost': [fxgb, txgb],
+    'Red Neuronal 1': [frn1, trn1],
+    'Red Neuronal 2': [frn2, trn2]
+}
+keys   = list(dict_roc.keys())
+values = list(dict_roc.values())
+
+
+# Figura
+plt.figure(figsize=(6, 5))
+plt.plot([0, 1], [0, 1], 'k--', label='(ROC = 0.5)')
+
+j = 0
+for i in values:
+    plt.plot(i[0], i[1], label=keys[j])
+    j += 1
+
+plt.xlabel('Ratio falso positivo')
+plt.ylabel('Ratio verdadero positivo')
+plt.title('Curvas ROC')
+plt.legend(fontsize=9)
+
+plt.savefig('Figuras/roc.pdf', bbox_inches='tight', transparent=True)
+plt.savefig('Figuras/roc.png', bbox_inches='tight', transparent=True)
+plt.show()
 
 
 
