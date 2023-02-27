@@ -1,4 +1,3 @@
-import pandas as pd
 import nltk
 from nltk.corpus import stopwords
 import string
@@ -31,7 +30,7 @@ def preprocess(y):
 
     # Lematización [list]
     lematizador = nltk.WordNetLemmatizer()
-    y = y.apply(lambda obs: [lematizador.lemmatize(w, pos='v') for w in obs])
+    y = y.apply(lambda obs: [lematizador.lemmatize(w) for w in obs])
 
     # Unión [lis -> str]
     y = y.apply(lambda obs: ' '.join(obs))

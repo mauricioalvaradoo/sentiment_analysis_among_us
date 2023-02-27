@@ -4,11 +4,15 @@ import matplotlib.pyplot as plt
 import pickle
 import gzip
 
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from xgboost import XGBClassifier
+
 import tensorflow as tf
+from tensorflow.keras.layers import (
+    Embedding, Conv1D, MaxPooling1D, GlobalMaxPooling1D, Dense
+)
 
 from sklearn.metrics import (
     accuracy_score, log_loss, f1_score,
@@ -38,10 +42,7 @@ X_train = utils.preprocess(X_train)
 X_test  = utils.preprocess(X_test)
 
 # Vectorización -> Asociado a X_train
-vectorizer  = TfidfVectorizer(
-    max_features = 15_000,
-    use_idf = True
-)
+vectorizer  = CountVectorizer()
 
 X_train = vectorizer.fit_transform(X_train).toarray()
 X_test  = vectorizer.transform(X_test).toarray()
@@ -65,21 +66,27 @@ Machine Learning:
 
 Deep Learning:
 * (3) Red Neuronal 1: Intermedia
-    + Embedding: 10 000 dimensiones en vocabulario
+    + Embedding: 15 000 dimensiones en vocabulario
     + Convolucional: 32 núcleos
-    + Pooling: Max
-    + Densa: 64 neuronas
+    + Pooling: Max: 2
+    + Convolucional: 64 núcleos
+    + Pooling: Max: 2
+    + Pooling: Global Max
+    + Densa: 32 neuronas
     + Densa: 1 neurona
 
 * (4) Red Neuronal 2: Compleja
     + Embedding: 20 000 dimensiones en vocabulario
     + Convolucional: 64 núcleos
-    + Pooling: Max
-    + Densa: 64 neuronas
+    + Pooling: Max: 3
+    + Convolucional: 128 núcleos
+    + Pooling: Max: 3 
+    + Pooling: Global Max
+    + Densa: 128 neuronas
     + Densa: 32 neuronas
     + Densa: 1 neurona
-    
-Todas con 50 epochs.
+
+Todas con 20 epochs.
 Acaba la estimación si se alcanza 0.01 de error o 99.5% de ajuste
 
 """
@@ -144,17 +151,23 @@ fxgb, txgb, thresholds = roc_curve(y_test, yhat_proba_xgb)
 # (3) Red Neuronal 1 ##########################################################
 rn1 = tf.keras.Sequential(
     [
-        tf.keras.layers.Embedding(5_000, output_dim=64),
-        tf.keras.layers.Conv1D(64, 3, activation='relu'),
-        tf.keras.layers.GlobalAveragePooling1D(), 
-        tf.keras.layers.Dense(64, activation='relu'),
-        tf.keras.layers.Dense(1, activation='sigmoid')
+        Embedding(input_dim=15_000, output_dim=128, name='embedding_1'),
+        
+        Conv1D(filters=32, kernel_size=3, activation='relu', name='conv_1'),
+        MaxPooling1D(pool_size=2, name='maxpool1'), 
+        Conv1D(filters=64, kernel_size=3, activation='relu', name='conv_2'),
+        MaxPooling1D(pool_size=2, name='maxpool2'), 
+        
+        GlobalMaxPooling1D(),
+        
+        Dense(units=64, activation='relu', name='dense_1'),
+        Dense(units=1, activation='sigmoid', name='dense_2')
     ]
 )
 
 rn1.compile(
     loss = tf.keras.losses.BinaryCrossentropy(),
-    optimizer = tf.keras.optimizers.Adam(0.001),
+    optimizer = tf.keras.optimizers.Adam(0.01),
     metrics = ['logcosh', 'accuracy']
 )
 
@@ -183,18 +196,24 @@ frn1, trn1, thresholds = roc_curve(y_test, yhat_proba_rn1)
 # (4) Red Neuronal 2 ##########################################################
 rn2 = tf.keras.Sequential(
     [
-        tf.keras.layers.Embedding(10_000, 64),
-        tf.keras.layers.Conv1D(64, 3, activation='relu'),
-        tf.keras.layers.GlobalAveragePooling1D(),
-        tf.keras.layers.Dense(64, activation='relu'),
-        tf.keras.layers.Dense(32, activation='relu'),
-        tf.keras.layers.Dense(1, activation='sigmoid')
+        Embedding(input_dim=20_000, output_dim=128, name='embedding_1'),
+        
+        Conv1D(filters=64, kernel_size=5, activation='relu', name='conv_1'),
+        MaxPooling1D(pool_size=3, name='maxpool1'), 
+        Conv1D(filters=128, kernel_size=5, activation='relu', name='conv_2'),
+        MaxPooling1D(pool_size=3, name='maxpool2'), 
+        
+        GlobalMaxPooling1D(),
+        
+        Dense(units=128, activation='relu', name='dense_1'),
+        Dense(units=32, activation='relu', name='dense_2'),
+        Dense(units=1, activation='sigmoid', name='dense_3')
     ]
 )
 
 rn2.compile(
     loss = tf.keras.losses.BinaryCrossentropy(),
-    optimizer = tf.keras.optimizers.Adam(0.001),
+    optimizer = tf.keras.optimizers.Adam(0.01),
     metrics = ['logcosh', 'accuracy']
 )
 
@@ -216,6 +235,20 @@ f1_rn2    = f1_score(y_test, yhat_rn2)
 conf_rn2   = confusion_matrix(y_test, yhat_rn2, normalize='true')
 report_rn2 = classification_report(y_test, yhat_rn2)
 frn2, trn2, thresholds = roc_curve(y_test, yhat_proba_rn2)
+
+
+
+
+# Guardando modelos ###########################################################
+with gzip.open('Modelos/lr.pklz', 'wb') as f:
+    pickle.dump(lr, f, protocol=pickle.HIGHEST_PROTOCOL)
+with gzip.open('Modelos/xgb.pklz', 'wb') as f:
+    pickle.dump(xgb, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+# Las redes neuronales serán guardadas con su propio método 'save' debido a que
+# tensorflow maneja su propio estilo de serialización.
+rn1.save('Modelos/rn1.h5') 
+rn2.save('Modelos/rn2.h5') 
 
 
 
@@ -314,16 +347,4 @@ plt.savefig('Figuras/roc.png', bbox_inches='tight', transparent=True)
 plt.show()
 
 
-
-
-# Guardando modelos ###########################################################
-with gzip.open('Modelos/lr.pklz', 'wb') as f:
-    pickle.dump(lr, f, protocol=pickle.HIGHEST_PROTOCOL)
-with gzip.open('Modelos/xgb.pklz', 'wb') as f:
-    pickle.dump(xgb, f, protocol=pickle.HIGHEST_PROTOCOL)
-
-# Las redes neuronales serán guardadas con su propio método 'save' debido a que
-# tensorflow maneja su propio estilo de serialización.
-rn1.save('Modelos/rn1.h5') 
-rn2.save('Modelos/rn2.h5') 
 
