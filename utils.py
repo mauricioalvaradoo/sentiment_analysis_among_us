@@ -7,15 +7,16 @@ stops = stopwords.words('spanish')
 punctuations = string.punctuation
 
 
-def preprocess(y):
+def preprocess(y, lemma=False):
     """ Procesamiento de texto
     Parámetros
     --------------
-    y [pd.Serie]: Texto 
+    y [pd.DataFrame]: Texto 
+    
 
     Retorno
     --------------
-    y [pd.Serie]: Texto procesado
+    y [pd.DataFrame]: Texto procesado
 
     """
 
@@ -27,13 +28,12 @@ def preprocess(y):
     y = y.apply(lambda obs: [w for w in obs if w.isalpha()])
     y = y.apply(lambda obs: [w for w in obs if w not in stops])
     y = y.apply(lambda obs: [w for w in obs if w not in punctuations])
-
-    # Lematización [list]
-    lematizador = nltk.WordNetLemmatizer()
-    y = y.apply(lambda obs: [lematizador.lemmatize(w) for w in obs])
-
+    
+    if lemma == True:
+        lematizador = nltk.WordNetLemmatizer()
+        y = y.apply(lambda obs: [lematizador.lemmatize(w) for w in obs])
+    
     # Unión [lis -> str]
     y = y.apply(lambda obs: ' '.join(obs))
-
+    
     return y
-

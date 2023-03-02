@@ -4,14 +4,18 @@ import matplotlib.pyplot as plt
 import pickle
 import gzip
 
-from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from xgboost import XGBClassifier
 
+import nltk
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 import tensorflow as tf
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.layers import (
-    Embedding, Conv1D, MaxPooling1D, GlobalMaxPooling1D, Dense
+    Embedding, Conv1D, MaxPooling1D, GlobalMaxPooling1D, Dense, Dropout
 )
 
 from sklearn.metrics import (
@@ -27,29 +31,52 @@ warnings.simplefilter('ignore')
 
 
 
-# Importación
+# Definición de elementos
 df_train = pd.read_pickle('Data/df_train_raw.pkl')
 df_test  = pd.read_pickle('Data/df_test_raw.pkl')
 
-# Definición de elementos
 X_train = df_train['comments']
 y_train = np.array(df_train['label'])
 X_test  = df_test['comments']
 y_test  = np.array(df_test['label'])
 
-# Procesando los textos
-X_train = utils.preprocess(X_train)
-X_test  = utils.preprocess(X_test)
 
-# Vectorización -> Asociado a X_train
-vectorizer  = CountVectorizer()
+# Procesando los textos #######################################################
+X_train_ml = utils.preprocess(X_train, lemma=True )
+X_test_ml  = utils.preprocess(X_test,  lemma=True )
+X_train_dl = utils.preprocess(X_train, lemma=False)
+X_test_dl  = utils.preprocess(X_test,  lemma=False)
 
-X_train = vectorizer.fit_transform(X_train).toarray()
-X_test  = vectorizer.transform(X_test).toarray()
+
+# Vectorización para modelos ML ###############################################
+# La vectorización SÍ considera Lemmatization
+vectorizer  = TfidfVectorizer(
+    max_features = 15_000,
+    use_idf = True
+)
+
+X_train_ml = vectorizer.fit_transform(X_train_ml).toarray()
+X_test_ml  = vectorizer.transform(X_test_ml).toarray()
 
 # Guardado el vectorizador
-with open('Data/vectorizer.pkl', 'wb') as f:
+with open('Data/vectorizer-ml.pkl', 'wb') as f:
     pickle.dump(vectorizer, f)
+
+
+
+# Vectorización para modelos DL ###############################################
+# La vectorización NO considera Lemmatization. Esto por las capas Embedding
+tokenizer = Tokenizer(num_words=15_000)
+tokenizer.fit_on_texts(X_train_dl)
+
+X_train_dl = tokenizer.texts_to_sequences(X_train_dl)
+X_test_dl  = tokenizer.texts_to_sequences(X_test_dl)
+X_train_dl = pad_sequences(X_train_dl, padding='post', maxlen=100)
+X_test_dl  = pad_sequences(X_test_dl,  padding='post', maxlen=100)
+
+# Guardado el tokenizador
+with open('Data/vectorizer-dl.pkl', 'wb') as f:
+    pickle.dump(tokenizer, f)
 
 
 
@@ -65,29 +92,29 @@ Machine Learning:
 * (2) XGBoost
 
 Deep Learning:
-* (3) Red Neuronal 1: Intermedia
+* (3) Red Neuronal 1: Básica
     + Embedding: 15 000 dimensiones en vocabulario
     + Convolucional: 32 núcleos
-    + Pooling: Max: 2
-    + Convolucional: 64 núcleos
-    + Pooling: Max: 2
     + Pooling: Global Max
-    + Densa: 32 neuronas
-    + Densa: 1 neurona
-
-* (4) Red Neuronal 2: Compleja
-    + Embedding: 20 000 dimensiones en vocabulario
-    + Convolucional: 64 núcleos
-    + Pooling: Max: 3
-    + Convolucional: 128 núcleos
-    + Pooling: Max: 3 
-    + Pooling: Global Max
+    + Dropout: 0.8
     + Densa: 128 neuronas
     + Densa: 32 neuronas
     + Densa: 1 neurona
 
+* (4) Red Neuronal 2: Intermedia
+    + Embedding: 15 000 dimensiones en vocabulario
+    + Convolucional: 32 núcleos
+    + MaxPooling: 3
+    + Dropout: 0.3
+    + Convolucional: 64 núcleos
+    + MaxPooling: 3
+    + Pooling: Global Max
+    + Dropout: 0.4
+    + Densa: 128 neuronas
+    + Densa: 64 neuronas
+    + Densa: 1 neurona
+
 Todas con 20 epochs.
-Acaba la estimación si se alcanza 0.01 de error o 99.5% de ajuste
 
 """
 
@@ -100,9 +127,9 @@ params = {
 }
 
 lr = GridSearchCV(LogisticRegression(), param_grid=params, cv=5, verbose=2)\
-    .fit(X_train, y_train)
-yhat_proba_lr = lr.predict_proba(X_test)[:,1]
-yhat_lr       = lr.predict(X_test)
+    .fit(X_train_ml, y_train)
+yhat_proba_lr = lr.predict_proba(X_test_ml)[:,1]
+yhat_lr       = lr.predict(X_test_ml)
 
 print('Hiperparámetros\t:', lr.best_params_)
 print('Ajuste\t:',          lr.best_score_)
@@ -128,9 +155,9 @@ params = {
 }
 
 xgb = GridSearchCV(XGBClassifier(), param_grid=params, cv=5, verbose=2)\
-    .fit(X_train, y_train)
-yhat_proba_xgb = xgb.predict_proba(X_test)[:,1]
-yhat_xgb       = xgb.predict(X_test)
+    .fit(X_train_ml, y_train)
+yhat_proba_xgb = xgb.predict_proba(X_test_ml)[:,1]
+yhat_xgb       = xgb.predict(X_test_ml)
 
 print('Hiperparámetros\t:', xgb.best_params_)
 print('Ajuste\t:',          xgb.best_score_)
@@ -151,17 +178,15 @@ fxgb, txgb, thresholds = roc_curve(y_test, yhat_proba_xgb)
 # (3) Red Neuronal 1 ##########################################################
 rn1 = tf.keras.Sequential(
     [
-        Embedding(input_dim=15_000, output_dim=128, name='embedding_1'),
+        Embedding(input_dim=15_000, output_dim=128, input_length=100, name='embedding_1'),
         
-        Conv1D(filters=32, kernel_size=3, activation='relu', name='conv_1'),
-        MaxPooling1D(pool_size=2, name='maxpool1'), 
-        Conv1D(filters=64, kernel_size=3, activation='relu', name='conv_2'),
-        MaxPooling1D(pool_size=2, name='maxpool2'), 
-        
+        Conv1D(filters=32, kernel_size=3, activation='relu', name='conv_1'),      
         GlobalMaxPooling1D(),
         
-        Dense(units=64, activation='relu', name='dense_1'),
-        Dense(units=1, activation='sigmoid', name='dense_2')
+        Dropout(0.5),
+        Dense(units=128, activation='relu', name='dense_1'),
+        Dense(units=32, activation='relu', name='dense_2'),
+        Dense(units=1, activation='sigmoid', name='dense_3')
     ]
 )
 
@@ -171,12 +196,12 @@ rn1.compile(
     metrics = ['logcosh', 'accuracy']
 )
 
-rn1.fit(
-    X_train, y_train, epochs=20,
-    validation_data=(X_test, y_test)
+history_rn1 = rn1.fit(
+    X_train_dl, y_train, epochs=30,
+    validation_data=(X_test_dl, y_test)
 )
 
-yhat_proba_rn1 = rn1.predict(X_test)
+yhat_proba_rn1 = rn1.predict(X_test_dl).flatten()
 yhat_rn1       = (yhat_proba_rn1>0.5).astype('int32')
 
 # Estadisticos
@@ -196,18 +221,20 @@ frn1, trn1, thresholds = roc_curve(y_test, yhat_proba_rn1)
 # (4) Red Neuronal 2 ##########################################################
 rn2 = tf.keras.Sequential(
     [
-        Embedding(input_dim=20_000, output_dim=128, name='embedding_1'),
+        Embedding(input_dim=15_000, output_dim=128, input_length=100, name='embedding_1'),
         
-        Conv1D(filters=64, kernel_size=5, activation='relu', name='conv_1'),
-        MaxPooling1D(pool_size=3, name='maxpool1'), 
-        Conv1D(filters=128, kernel_size=5, activation='relu', name='conv_2'),
+        Conv1D(filters=32, kernel_size=5, activation='relu', name='conv_1'),
+        MaxPooling1D(pool_size=3, name='maxpool1'),
+        Dropout(0.5),
+        Conv1D(filters=64, kernel_size=5, activation='relu', name='conv_2'),
         MaxPooling1D(pool_size=3, name='maxpool2'), 
         
         GlobalMaxPooling1D(),
         
+        Dropout(0.5),
         Dense(units=128, activation='relu', name='dense_1'),
-        Dense(units=32, activation='relu', name='dense_2'),
-        Dense(units=1, activation='sigmoid', name='dense_3')
+        Dense(units=64, activation='relu', name='dense_1'),
+        Dense(units=1, activation='sigmoid', name='dense_2')
     ]
 )
 
@@ -217,12 +244,12 @@ rn2.compile(
     metrics = ['logcosh', 'accuracy']
 )
 
-rn2.fit(
-    X_train, y_train, epochs=20,
-    validation_data=(X_test, y_test)
+history_rn2 = rn2.fit(
+    X_train_dl, y_train, epochs=30,
+    validation_data=(X_test_dl, y_test)
 )
 
-yhat_proba_rn2 = rn2.predict(X_test)
+yhat_proba_rn2 = rn2.predict(X_test_dl).flatten()
 yhat_rn2       = (yhat_proba_rn2>0.5).astype('int32')
 
 # Estadisticos
@@ -329,7 +356,7 @@ values = list(dict_roc.values())
 
 
 # Figura
-plt.figure(figsize=(6, 5))
+plt.figure()
 plt.plot([0, 1], [0, 1], 'k--', label='(ROC = 0.5)')
 
 j = 0
