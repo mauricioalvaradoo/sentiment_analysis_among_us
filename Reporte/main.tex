@@ -41,24 +41,24 @@ Se consideraron dos algoritmos de \textit{machine learning} (\textit{ML}) y dos 
 
 Los dos algoritmos considerados para \textit{ML} son los de Regresión Logística y de XGBoost. El primero fue elegido por ser uno de los algoritmos más usados para propuestas simples de clasificación. De hecho, es uno de los primeros algoritmos que se aprenden en diversos cursos a lo largo del mundo. El segundo fue elegido por ser uno de los algoritmos preferidos por muchos \textit{data scientists} por su gran rendimiento en términos de eficiencia, ajuste y aprendizaje\footnote{Para más detalle sobre sus ventajas y razones de su gran popularidad, se puede revisar lo siguiente: \url{https://www.analyticsvidhya.com/blog/2016/03/complete-guide-parameter-tuning-xgboost-with-codes-python/}.}.
 
-Para ambos algoritmos se estimó la mejor versión de estos basado en la selección de los hiperpárametros que maximicen el ajuste con los datos de entrenamiento. Se usó el método \textit{GridSearchCV} que recoge las diferentes combinaciones de hiperparámetros definidos con anterioridad y estima el modelo con 5-Folds mediante \textit{cross-validation}\footnote{Consiste en separar las observaciones de entrenamiento en cinco grupos, estimar con cuatro de estos y reservar el quinto como un \textit{testing} para estimar el ajuste. Tras realizar este ejercicio con las cinco combinaciones posibles, se obtiene cinco métricas de ajuste diferentes que serán promediadas. El objetivo de este ejercicio es corroborar la inexistencia de \textit{overfitting}, lo cual se debería reflejar en métricas de ajuste en los datos de \textit{test} muy similares al de los de entrenamiento.}. Para el caso de Regresión Logística se consideró como parámetros de regularización a 0.001, 0.01, 0.1, 1, 10 y 100. Para el caso del algoritmo de XGBoost se consideró 100, 200 y 500 árboles de decisión; 3, 5 y 7 de profundidad máxima en cada uno de los nodos; y 0.1, 0.01 y 0.001 de \textit{learning rate} en cada estimación.
+Para ambos algoritmos se estimó la mejor versión de estos basado en la selección de los hiperpárametros que maximicen el ajuste con los datos de entrenamiento. Se usó el método \textit{GridSearchCV} que recoge las diferentes combinaciones de hiperparámetros definidos con anterioridad y estima el modelo con 5-Folds mediante \textit{cross-validation}\footnote{Consiste en separar las observaciones de entrenamiento en cinco grupos, estimar con cuatro de estos y reservar el quinto como un \textit{testing} para estimar el ajuste. Tras realizar este ejercicio con las cinco combinaciones posibles, se obtiene cinco métricas de ajuste diferentes que serán promediadas. El objetivo de este ejercicio es corroborar la inexistencia de \textit{overfitting}, lo cual se debería reflejar en métricas de ajuste en los datos de \textit{test} muy similares al de los de entrenamiento.}. Para el caso de Regresión Logística se consideró como parámetros de regularización a 0.001, 0.01, 0.1, 1, 10 y 100. Para el caso del algoritmo de XGBoost se consideró 100 y 200 árboles de decisión; 3, 5 y 7 de profundidad máxima en cada uno de los nodos; y 0.1, 0.01 y 0.001 de \textit{learning rate} en cada estimación.
 
 Para el caso los algoritmos de \textit{DL}, se propuso dos arquitecturas neuronales que cuentan con capas de \textit{embedding}, \textit{convolucionales}, \textit{dropout}, \textit{pooling} y \textit{densas}. La primera estructura será llamada “intermedia” y la segunda será llamada “compleja”. La primera consiste de 
 
-\subsection{Comparativa entre modelos}
 
+\subsection{Comparativa entre modelos}
 % o	Entrenar al menos 2 algoritmos (1 tradicional y 1 profundo) que pueda identificar
 % el sentimiento del comentario (positivo, negativo). Aplicar pre-procesamiento y
 % vectorización de texto.
 .
 
-\section{Selección de modelo}
+\section{Resultados}
+\subsection{Selección de modelo}
 % Explicar el proceso del entrenamiento y de las pruebas (porqué escogieron esos
 % algoritmos, qué métricas usaron y sus valores, cual obtuvo el mejor performance,
 % problemas que se presentaron, etc.)
 .
-
-\section{Resultados}
+\subsection{Clasificación de comentarios}
 % Brindar conclusiones
 .
 

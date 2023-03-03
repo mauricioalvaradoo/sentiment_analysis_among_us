@@ -92,24 +92,20 @@ Machine Learning:
 * (2) XGBoost
 
 Deep Learning:
-* (3) Red Neuronal 1: Básica
+* (3) Convolucional Red Neuronal 1: Básica
     + Embedding: 15 000 dimensiones en vocabulario
     + Convolucional: 32 núcleos
     + Pooling: Global Max
-    + Dropout: 0.8
+    + Dropout: 0.5
     + Densa: 128 neuronas
     + Densa: 32 neuronas
     + Densa: 1 neurona
 
-* (4) Red Neuronal 2: Intermedia
+* (4) Convolucional Red Neuronal 2: Intermedia
     + Embedding: 15 000 dimensiones en vocabulario
-    + Convolucional: 32 núcleos
-    + MaxPooling: 3
-    + Dropout: 0.3
     + Convolucional: 64 núcleos
-    + MaxPooling: 3
     + Pooling: Global Max
-    + Dropout: 0.4
+    + Dropout: 0.3
     + Densa: 128 neuronas
     + Densa: 64 neuronas
     + Densa: 1 neurona
@@ -137,6 +133,7 @@ print('Ajuste\t:',          lr.best_score_)
 # Estadisticos
 score_lr = accuracy_score(y_test, yhat_lr)
 loss_lr  = log_loss(y_test, yhat_lr)
+error_lr = np.mean(y_test != yhat_lr)
 f1_lr    = f1_score(y_test, yhat_lr)
 
 # Confusion matrix y ROC
@@ -149,9 +146,9 @@ flr, tlr, thresholds = roc_curve(y_test, yhat_proba_lr)
 
 # (2) XGBoost #################################################################
 params = {
-    'n_estimators':  [100, 200, 500],  # Cantidad de árboles
-    'max_depth':     [3, 5, 7],        # Máxima profundida de árboles
-    'learning_rate': [0.01, 0.001]     # Learning rate
+    'n_estimators':  [200, 400], # Cantidad de árboles
+    'max_depth':     [5, 7, 9],  # Máxima profundida de árboles
+    'learning_rate': [0.01]      # Learning rate
 }
 
 xgb = GridSearchCV(XGBClassifier(), param_grid=params, cv=5, verbose=2)\
@@ -161,10 +158,18 @@ yhat_xgb       = xgb.predict(X_test_ml)
 
 print('Hiperparámetros\t:', xgb.best_params_)
 print('Ajuste\t:',          xgb.best_score_)
+# results_cv     = xgb.cv_results_
+# params_cv      = results_cv['params']
+# mean_scores_cv = results_cv['mean_test_score']
+# std_scores_cv  = results_cv['std_test_score']
+# for i in range(len(params_cv)):
+#     print(params_cv[i], " -- mean score:", mean_scores_cv[i], " -- std score:", std_scores_cv[i])
+
 
 # Estadisticos
 score_xgb = accuracy_score(y_test, yhat_xgb)
 loss_xgb  = log_loss(y_test, yhat_xgb)
+error_xgb = np.mean(y_test != yhat_xgb)
 f1_xgb    = f1_score(y_test, yhat_xgb)
 
 # Confusion matrix y ROC
@@ -223,18 +228,13 @@ rn2 = tf.keras.Sequential(
     [
         Embedding(input_dim=15_000, output_dim=128, input_length=100, name='embedding_1'),
         
-        Conv1D(filters=32, kernel_size=5, activation='relu', name='conv_1'),
-        MaxPooling1D(pool_size=3, name='maxpool1'),
-        Dropout(0.5),
-        Conv1D(filters=64, kernel_size=5, activation='relu', name='conv_2'),
-        MaxPooling1D(pool_size=3, name='maxpool2'), 
-        
+        Conv1D(filters=64, kernel_size=3, activation='relu', name='conv_1'),      
         GlobalMaxPooling1D(),
         
-        Dropout(0.5),
+        Dropout(0.3),
         Dense(units=128, activation='relu', name='dense_1'),
-        Dense(units=64, activation='relu', name='dense_1'),
-        Dense(units=1, activation='sigmoid', name='dense_2')
+        Dense(units=64, activation='relu', name='dense_2'),
+        Dense(units=1, activation='sigmoid', name='dense_3')
     ]
 )
 
@@ -255,7 +255,7 @@ yhat_rn2       = (yhat_proba_rn2>0.5).astype('int32')
 # Estadisticos
 score_rn2 = accuracy_score(y_test, yhat_rn2)
 loss_rn2  = log_loss(y_test, yhat_rn2)
-error_rn2 = np.mean(y_test, yhat_rn2)
+error_rn2 = np.mean(y_test != yhat_rn2)
 f1_rn2    = f1_score(y_test, yhat_rn2)
 
 # Confusion matrix y ROC
@@ -279,21 +279,14 @@ rn2.save('Modelos/rn2.h5')
 
 
 
+# Recuperando modelos #########################################################
+# with gzip.open('Modelos/lr.pklz', 'rb') as f:
+#     lr = pickle.load(f, protocol=pickle.HIGHEST_PROTOCOL)
+# with gzip.open('Modelos/xgb.pklz', 'rb') as f:
+#     xgb = pickle.load(f, protocol=pickle.HIGHEST_PROTOCOL)
 
-# Figuras de las arquitecturas ################################################
-tf.keras.utils.plot_model(
-    rn1, to_file='Figuras/rn1.eps', show_shapes=True, show_layer_names=True
-)
-tf.keras.utils.plot_model(
-    rn1, to_file='Figuras/rn1.pdf', show_shapes=True, show_layer_names=True
-)
-
-tf.keras.utils.plot_model(
-    rn2, to_file='Figuras/rn2.eps', show_shapes=True, show_layer_names=True
-)
-tf.keras.utils.plot_model(
-    rn2, to_file='Figuras/rn2.pdf', show_shapes=True, show_layer_names=True
-)
+# rn1.load('Modelos/rn1.h5') 
+# rn2.load('Modelos/rn2.h5') 
 
 
 
@@ -303,8 +296,8 @@ tf.keras.utils.plot_model(
 dict_ajust = {
     'Regresión Logística': score_lr,
     'XGBoost': score_xgb,
-    'Red Neuronal 1': score_rn1,
-    'Red Neuronal 2': score_rn2,
+    'CNN Básica': score_rn1,
+    'CNN Intermedia': score_rn2,
 }
 
 df_score = pd.DataFrame(dict_ajust.items(), columns=['Modelo', 'Score']).set_index('Modelo')
@@ -318,8 +311,8 @@ print(df_score)
 dict_loss = {
     'Regresión Logística': loss_lr,
     'XGBoost': loss_xgb,
-    'Red Neuronal 1': loss_rn1,
-    'Red Neuronal 2': loss_rn2,
+    'CNN Básica': loss_rn1,
+    'CNN Intermedia': loss_rn2,
 }
 
 df_loss = pd.DataFrame(dict_loss.items(), columns=['Modelo', 'LogLoss']).set_index('Modelo')
@@ -333,8 +326,8 @@ print(df_loss)
 dict_f1 = {
     'Regresión Logística': f1_lr,
     'XGBoost': f1_xgb,
-    'Red Neuronal 1': f1_rn1,
-    'Red Neuronal 2': f1_rn2,
+    'CNN Básica': f1_rn1,
+    'CNN Intermedia': f1_rn2,
 }
 
 df_f1 = pd.DataFrame(dict_f1.items(), columns=['Modelo', 'F1-Score']).set_index('Modelo')
@@ -348,8 +341,8 @@ print(df_f1)
 dict_roc = {
     'Regresión logistica': [flr, tlr],
     'XGBoost': [fxgb, txgb],
-    'Red Neuronal 1': [frn1, trn1],
-    'Red Neuronal 2': [frn2, trn2]
+    'CNN Básica': [frn1, trn1],
+    'CNN Intermedia': [frn2, trn2]
 }
 keys   = list(dict_roc.keys())
 values = list(dict_roc.values())
@@ -374,4 +367,15 @@ plt.savefig('Figuras/roc.png', bbox_inches='tight', transparent=True)
 plt.show()
 
 
+
+
+# Guardando estadísticas ######################################################
+with open('Data/dict_ajust.pkl', 'wb') as f:
+    pickle.dump(dict_ajust, f)
+with open('Data/dict_loss.pkl', 'wb') as f:
+    pickle.dump(dict_loss, f)
+with open('Data/dict_f1.pkl', 'wb') as f:
+    pickle.dump(dict_f1, f)
+with open('Data/dict_roc.pkl', 'wb') as f:
+    pickle.dump(dict_roc, f)
 
