@@ -40,3 +40,7 @@ Finalmente, la clasificación de los comentarios se realizaron con la Regresión
 <p align="center">
   <img src="Figuras/clasificación.png" width="500">
 </p>
+
+## Agenda
+1. Aumentar la cantidad de algoritmos de clasificación como el Decision Tree, Random Forest, XGBoost y SVM.
+2. Mejorar las arquitecturas de redes neuronales de tal manera que se encuentre una que no genere overfitting.
