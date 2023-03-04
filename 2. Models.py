@@ -83,25 +83,23 @@ with open('Data/vectorizer-dl.pkl', 'wb') as f:
 
 ## Modelos ####################################################################
 """
-Se comparará algoritmos de ML y estructuras de DL.
+Se comparará un algoritmo de ML y dos estructuras de DL.
 Se buscará estimar el mejor modelo. Si se requiere, se usará GridSearchCV.
-La comparativa se hará mediante ajuste, logloss, f1-score, curva ROC.
+La comparativa se hará mediante logloss, f1-score, curva ROC.
 
 Machine Learning:
 * (1) Regresión Logística
-* (2) XGBoost
 
 Deep Learning:
-* (3) Convolucional Red Neuronal 1: Básica
+* (2) Convolucional Red Neuronal 1: Básica
     + Embedding: 15 000 dimensiones en vocabulario
     + Convolucional: 32 núcleos
     + Pooling: Global Max
-    + Dropout: 0.5
-    + Densa: 128 neuronas
-    + Densa: 32 neuronas
+    + Dropout: 0.8
+    + Densa: 16 neuronas
     + Densa: 1 neurona
 
-* (4) Convolucional Red Neuronal 2: Intermedia
+* (3) Convolucional Red Neuronal 2: Intermedia
     + Embedding: 15 000 dimensiones en vocabulario
     + Convolucional: 64 núcleos
     + Pooling: Global Max
@@ -144,43 +142,7 @@ flr, tlr, thresholds = roc_curve(y_test, yhat_proba_lr)
 
 
 
-# (2) XGBoost #################################################################
-params = {
-    'n_estimators':  [200, 400], # Cantidad de árboles
-    'max_depth':     [5, 7, 9],  # Máxima profundida de árboles
-    'learning_rate': [0.01]      # Learning rate
-}
-
-xgb = GridSearchCV(XGBClassifier(), param_grid=params, cv=5, verbose=2)\
-    .fit(X_train_ml, y_train)
-yhat_proba_xgb = xgb.predict_proba(X_test_ml)[:,1]
-yhat_xgb       = xgb.predict(X_test_ml)
-
-print('Hiperparámetros\t:', xgb.best_params_)
-print('Ajuste\t:',          xgb.best_score_)
-# results_cv     = xgb.cv_results_
-# params_cv      = results_cv['params']
-# mean_scores_cv = results_cv['mean_test_score']
-# std_scores_cv  = results_cv['std_test_score']
-# for i in range(len(params_cv)):
-#     print(params_cv[i], " -- mean score:", mean_scores_cv[i], " -- std score:", std_scores_cv[i])
-
-
-# Estadisticos
-score_xgb = accuracy_score(y_test, yhat_xgb)
-loss_xgb  = log_loss(y_test, yhat_xgb)
-error_xgb = np.mean(y_test != yhat_xgb)
-f1_xgb    = f1_score(y_test, yhat_xgb)
-
-# Confusion matrix y ROC
-conf_xgb = confusion_matrix(y_test, yhat_xgb, normalize='true')
-report_xgb = classification_report(y_test, yhat_xgb)
-fxgb, txgb, thresholds = roc_curve(y_test, yhat_proba_xgb)
-
-
-
-
-# (3) Red Neuronal 1 ##########################################################
+# (2) Red Neuronal 1 ##########################################################
 rn1 = tf.keras.Sequential(
     [
         Embedding(input_dim=15_000, output_dim=128, input_length=100, name='embedding_1'),
@@ -188,10 +150,9 @@ rn1 = tf.keras.Sequential(
         Conv1D(filters=32, kernel_size=3, activation='relu', name='conv_1'),      
         GlobalMaxPooling1D(),
         
-        Dropout(0.5),
-        Dense(units=128, activation='relu', name='dense_1'),
-        Dense(units=32, activation='relu', name='dense_2'),
-        Dense(units=1, activation='sigmoid', name='dense_3')
+        Dropout(0.8),
+        Dense(units=16, activation='relu', name='dense_1'),
+        Dense(units=1, activation='sigmoid', name='dense_2')
     ]
 )
 
@@ -223,7 +184,7 @@ frn1, trn1, thresholds = roc_curve(y_test, yhat_proba_rn1)
 
 
 
-# (4) Red Neuronal 2 ##########################################################
+# (3) Red Neuronal 2 ##########################################################
 rn2 = tf.keras.Sequential(
     [
         Embedding(input_dim=15_000, output_dim=128, input_length=100, name='embedding_1'),
@@ -269,8 +230,6 @@ frn2, trn2, thresholds = roc_curve(y_test, yhat_proba_rn2)
 # Guardando modelos ###########################################################
 with gzip.open('Modelos/lr.pklz', 'wb') as f:
     pickle.dump(lr, f, protocol=pickle.HIGHEST_PROTOCOL)
-with gzip.open('Modelos/xgb.pklz', 'wb') as f:
-    pickle.dump(xgb, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 # Las redes neuronales serán guardadas con su propio método 'save' debido a que
 # tensorflow maneja su propio estilo de serialización.
@@ -290,27 +249,43 @@ rn2.save('Modelos/rn2.h5')
 
 
 
+# Historia de las CNN #########################################################
+## Red Neuronal 1
+plt.plot(history_rn1.history['accuracy'], label='train')
+plt.plot(history_rn1.history['val_accuracy'], label='test')
+
+plt.ylim([0.6, 1])
+plt.xlabel('Epochs')
+plt.ylabel('Ajuste')
+plt.legend()
+# plt.title('Ajuste en CNN Básica')
+
+plt.savefig('Figuras/accuracy_cnn_1.png')
+plt.savefig('Figuras/accuracy_cnn_1.pdf')
+plt.show()
+
+
+## Red Neuronal 2
+plt.plot(history_rn2.history['accuracy'], label='train')
+plt.plot(history_rn2.history['val_accuracy'], label='test')
+
+plt.ylim([0.6, 1])
+plt.xlabel('Epochs')
+plt.ylabel('Ajuste')
+plt.legend()
+# plt.title('Ajuste en CNN Intermedia')
+
+plt.savefig('Figuras/accuracy_cnn_2.png')
+plt.savefig('Figuras/accuracy_cnn_2.pdf')
+plt.show()
+
+
+
 
 # Comparativa #################################################################
-## 1. Ajuste
-dict_ajust = {
-    'Regresión Logística': score_lr,
-    'XGBoost': score_xgb,
-    'CNN Básica': score_rn1,
-    'CNN Intermedia': score_rn2,
-}
-
-df_score = pd.DataFrame(dict_ajust.items(), columns=['Modelo', 'Score']).set_index('Modelo')
-df_score['Score'] = np.round(df_score['Score'], 3)
-df_score = df_score.sort_values('Score', ascending=False)
-
-print(df_score)
-
-
-## 2. LogLoss
+## 1. LogLoss
 dict_loss = {
     'Regresión Logística': loss_lr,
-    'XGBoost': loss_xgb,
     'CNN Básica': loss_rn1,
     'CNN Intermedia': loss_rn2,
 }
@@ -322,10 +297,9 @@ df_loss = df_loss.sort_values('LogLoss', ascending=True)
 print(df_loss)
 
 
-## 3. F1-Score
+## 2. F1-Score
 dict_f1 = {
     'Regresión Logística': f1_lr,
-    'XGBoost': f1_xgb,
     'CNN Básica': f1_rn1,
     'CNN Intermedia': f1_rn2,
 }
@@ -337,10 +311,9 @@ df_f1 = df_f1.sort_values('F1-Score', ascending=False)
 print(df_f1)
 
 
-## 4. Curva ROC
+## 3. Curva ROC
 dict_roc = {
     'Regresión logistica': [flr, tlr],
-    'XGBoost': [fxgb, txgb],
     'CNN Básica': [frn1, trn1],
     'CNN Intermedia': [frn2, trn2]
 }
@@ -359,7 +332,7 @@ for i in values:
 
 plt.xlabel('Ratio falso positivo')
 plt.ylabel('Ratio verdadero positivo')
-plt.title('Curvas ROC')
+# plt.title('Curvas ROC')
 plt.legend(fontsize=9)
 
 plt.savefig('Figuras/roc.pdf', bbox_inches='tight', transparent=True)
@@ -370,8 +343,6 @@ plt.show()
 
 
 # Guardando estadísticas ######################################################
-with open('Data/dict_ajust.pkl', 'wb') as f:
-    pickle.dump(dict_ajust, f)
 with open('Data/dict_loss.pkl', 'wb') as f:
     pickle.dump(dict_loss, f)
 with open('Data/dict_f1.pkl', 'wb') as f:

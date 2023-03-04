@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.3) (preloaded format=pdflatex 2022.6.28)  3 MAR 2023 11:50
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.3) (preloaded format=pdflatex 2022.6.28)  4 MAR 2023 00:41
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -271,25 +271,45 @@ Package: amssymb 2013/01/14 v3.01 AMS font symbols
 \c@problem=\count287
 \c@proposition=\count288
 
+(C:\Users\user\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty
+Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
+\heavyrulewidth=\dimen153
+\lightrulewidth=\dimen154
+\cmidrulewidth=\dimen155
+\belowrulesep=\dimen156
+\belowbottomsep=\dimen157
+\aboverulesep=\dimen158
+\abovetopsep=\dimen159
+\cmidrulesep=\dimen160
+\cmidrulekern=\dimen161
+\defaultaddspace=\dimen162
+\@cmidla=\count289
+\@cmidlb=\count290
+\@aboverulesep=\dimen163
+\@belowrulesep=\dimen164
+\@thisruleclass=\count291
+\@lastruleclass=\count292
+\@thisrulewidth=\dimen165
+)
 (C:\Users\user\AppData\Local\Programs\MiKTeX\tex/latex/tools\multicol.sty
 Package: multicol 2021/10/28 v1.9b multicolumn formatting (FMi)
-\c@tracingmulticols=\count289
+\c@tracingmulticols=\count293
 \mult@box=\box52
-\multicol@leftmargin=\dimen153
-\c@unbalance=\count290
-\c@collectmore=\count291
-\doublecol@number=\count292
-\multicoltolerance=\count293
-\multicolpretolerance=\count294
-\full@width=\dimen154
-\page@free=\dimen155
-\premulticols=\dimen156
-\postmulticols=\dimen157
+\multicol@leftmargin=\dimen166
+\c@unbalance=\count294
+\c@collectmore=\count295
+\doublecol@number=\count296
+\multicoltolerance=\count297
+\multicolpretolerance=\count298
+\full@width=\dimen167
+\page@free=\dimen168
+\premulticols=\dimen169
+\postmulticols=\dimen170
 \multicolsep=\skip53
 \multicolbaselineskip=\skip54
 \partial@page=\box53
 \last@line=\box54
-\maxbalancingoverflow=\dimen158
+\maxbalancingoverflow=\dimen171
 \mult@rightbox=\box55
 \mult@grightbox=\box56
 \mult@firstbox=\box57
@@ -330,15 +350,15 @@ Package: multicol 2021/10/28 v1.9b multicolumn formatting (FMi)
 \@tempa=\box92
 \@tempa=\box93
 \@tempa=\box94
-\c@minrows=\count295
-\c@columnbadness=\count296
-\c@finalcolumnbadness=\count297
-\last@try=\dimen159
-\multicolovershoot=\dimen160
-\multicolundershoot=\dimen161
+\c@minrows=\count299
+\c@columnbadness=\count300
+\c@finalcolumnbadness=\count301
+\last@try=\dimen172
+\multicolovershoot=\dimen173
+\multicolundershoot=\dimen174
 \mult@nat@firstbox=\box95
 \colbreak@box=\box96
-\mc@col@check@num=\count298
+\mc@col@check@num=\count302
 )
 (C:\Users\user\AppData\Local\Programs\MiKTeX\tex/latex/graphics\graphicx.sty
 Package: graphicx 2021/09/16 v1.2d Enhanced LaTeX Graphics (DPC,SPQR)
@@ -358,10 +378,10 @@ Package graphics Info: Driver file: pdftex.def on input line 107.
 (C:\Users\user\AppData\Local\Programs\MiKTeX\tex/latex/graphics-def\pdftex.def
 File: pdftex.def 2020/10/05 v1.2a Graphics/color driver for pdftex
 ))
-\Gin@req@height=\dimen162
-\Gin@req@width=\dimen163
+\Gin@req@height=\dimen175
+\Gin@req@width=\dimen176
 )
-\c@corollary=\count299
+\c@corollary=\count303
  (C:\Users\user\AppData\Local\Programs\MiKTeX\tex/latex/graphics\lscape.sty
 Package: lscape 2020/05/28 v3.02 Landscape Pages (DPC)
 )
@@ -374,7 +394,7 @@ Package: ifthen 2020/11/24 v1.1c Standard LaTeX ifthen package (DPC)
 (C:\Users\user\AppData\Local\Programs\MiKTeX\tex/latex/l3backend\l3backend-pdft
 ex.def
 File: l3backend-pdftex.def 2022-02-07 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count300
+\l__color_backend_stack_int=\count304
 \l__pdf_internal_box=\box97
 ) (main.aux
 LaTeX Info: Redefining \. on input line 26.
@@ -422,7 +442,7 @@ Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
 estring.sty
 Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
-\c@section@level=\count301
+\c@section@level=\count305
 )
 LaTeX Info: Redefining \ref on input line 8.
 LaTeX Info: Redefining \pageref on input line 8.
@@ -435,16 +455,16 @@ LaTeX Info: Redefining \nameref on input line 8.
 (C:\Users\user\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mki
 i
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count302
-\scratchdimen=\dimen164
+\scratchcounter=\count306
+\scratchdimen=\dimen177
 \scratchbox=\box98
-\nofMPsegments=\count303
-\nofMParguments=\count304
+\nofMPsegments=\count307
+\nofMParguments=\count308
 \everyMPshowfont=\toks26
-\MPscratchCnt=\count305
-\MPscratchDim=\dimen165
-\MPnumerator=\count306
-\makeMPintoPDFobject=\count307
+\MPscratchCnt=\count309
+\MPscratchDim=\dimen178
+\MPnumerator=\count310
+\makeMPintoPDFobject=\count311
 \everyMPtoPDFconversion=\toks27
 )
 (C:\Users\user\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-ba
@@ -471,34 +491,68 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 [1
 
 {C:/Users/user/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}] [2]
-(main.aux
+[3]
+<../Figuras/roc.pdf, id=95, 387.22481pt x 263.16693pt>
+File: ../Figuras/roc.pdf Graphic file (type pdf)
+<use ../Figuras/roc.pdf>
+Package pdftex.def Info: ../Figuras/roc.pdf  used on input line 132.
+(pdftex.def)             Requested size: 281.85585pt x 191.5561pt.
+ [4] [5 <../Figuras/roc.pdf>]
+<../Figuras/clasificación.pdf, id=149, 433.62pt x 289.08pt>
+File: ../Figuras/clasificación.pdf Graphic file (type pdf)
+<use ../Figuras/clasificación.pdf>
+Package pdftex.def Info: ../Figuras/clasificación.pdf  used on input line 170.
+
+(pdftex.def)             Requested size: 281.85585pt x 187.913pt.
+ [6 <../Figuras/clasificación.pdf>] [7]
+<../Figuras/accuracy_cnn_1.pdf, id=190, 433.62pt x 289.08pt>
+File: ../Figuras/accuracy_cnn_1.pdf Graphic file (type pdf)
+<use ../Figuras/accuracy_cnn_1.pdf>
+Package pdftex.def Info: ../Figuras/accuracy_cnn_1.pdf  used on input line 193.
+
+(pdftex.def)             Requested size: 281.85585pt x 187.913pt.
+<../Figuras/accuracy_cnn_2.pdf, id=191, 433.62pt x 289.08pt>
+File: ../Figuras/accuracy_cnn_2.pdf Graphic file (type pdf)
+<use ../Figuras/accuracy_cnn_2.pdf>
+Package pdftex.def Info: ../Figuras/accuracy_cnn_2.pdf  used on input line 198.
+
+(pdftex.def)             Requested size: 281.85585pt x 187.913pt.
+
+[8 <../Figuras/accuracy_cnn_1.pdf> <../Figuras/accuracy_cnn_2.pdf>] (main.aux
 LaTeX Info: Redefining \. on input line 26.
 LaTeX Info: Redefining \% on input line 26.
 )
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 457437F509930B80206E1F3988555F1D;1176.
+(rerunfilecheck)             Checksum: 8C196DFBC4E9EBDFC1FA4711BB4CFD6E;1895.
  ) 
 Here is how much of TeX's memory you used:
- 11155 strings out of 478582
- 175742 string characters out of 2844816
- 481440 words of memory out of 3000000
- 29176 multiletter control sequences out of 15000+600000
- 477562 words of font info for 60 fonts, out of 8000000 for 9000
+ 11294 strings out of 478582
+ 178406 string characters out of 2844816
+ 484318 words of memory out of 3000000
+ 29281 multiletter control sequences out of 15000+600000
+ 478089 words of font info for 62 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 65i,8n,66p,1253b,363s stack positions out of 10000i,1000n,20000p,200000b,80000s
+ 65i,10n,66p,1288b,368s stack positions out of 10000i,1000n,20000p,200000b,80000s
 <C:/Users/user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/c
 mbx10.pfb><C:/Users/user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfo
-nts/cm/cmr10.pfb><C:/Users/user/AppData/Local/Programs/MiKTeX/fonts/type1/publi
-c/amsfonts/cm/cmr17.pfb><C:/Users/user/AppData/Local/Programs/MiKTeX/fonts/type
-1/public/amsfonts/cm/cmr6.pfb><C:/Users/user/AppData/Local/Programs/MiKTeX/font
-s/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/user/AppData/Local/Programs/MiKTe
-X/fonts/type1/public/amsfonts/cm/cmr9.pfb><C:/Users/user/AppData/Local/Programs
-/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/user/AppData/Local/
-Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti9.pfb><C:/Users/user/AppData
-/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
-Output written on main.pdf (2 pages, 135547 bytes).
+nts/cm/cmbxti10.pfb><C:/Users/user/AppData/Local/Programs/MiKTeX/fonts/type1/pu
+blic/amsfonts/cm/cmex10.pfb><C:/Users/user/AppData/Local/Programs/MiKTeX/fonts/
+type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/user/AppData/Local/Programs/MiKTe
+X/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/user/AppData/Local/Program
+s/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/user/AppData/Local/
+Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/user/AppData
+/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/user/A
+ppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/
+user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr9.pfb><C:/
+Users/user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.
+pfb><C:/Users/user/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm
+/cmti10.pfb><C:/Users/user/AppData/Local/Programs/MiKTeX/fonts/type1/public/ams
+fonts/cm/cmti9.pfb><C:/Users/user/AppData/Local/Programs/MiKTeX/fonts/type1/pub
+lic/amsfonts/cm/cmtt10.pfb><C:/Users/user/AppData/Local/Programs/MiKTeX/fonts/t
+ype1/public/amsfonts/cm/cmtt9.pfb>
+Output written on main.pdf (8 pages, 274379 bytes).
 PDF statistics:
- 106 PDF objects out of 1000 (max. 8388607)
- 14 named destinations out of 1000 (max. 500000)
- 73 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 332 PDF objects out of 1000 (max. 8388607)
+ 37 named destinations out of 1000 (max. 500000)
+ 133 words of extra memory for PDF output out of 10000 (max. 10000000)
 

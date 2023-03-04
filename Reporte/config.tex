@@ -8,7 +8,7 @@
 \topmargin 10pt
 \advance \topmargin by -\headheight
 \advance \topmargin by -\headsep
-\textheight 8.5in
+\textheight 8.5in %%
 \oddsidemargin -0pt
 \evensidemargin \oddsidemargin
 \marginparwidth 0.5in
@@ -16,6 +16,7 @@
 \let \large=\normalsize
 \let \Large=\large
 \let \tilde=\widetilde
+\setlength{\parindent}{0pt} %%%%
 
 % Hipervínculos
 \usepackage[
@@ -37,6 +38,7 @@ citecolor = blue
 \newenvironment{proof}[1][Proof]{\textbf{#1.} }{\rule{0.5em}{0.5em}}
 
 % Tablas y figuras
+\usepackage{booktabs}
 \usepackage{multicol}%
 \setcounter{MaxMatrixCols}{30}
 \usepackage{graphicx}
