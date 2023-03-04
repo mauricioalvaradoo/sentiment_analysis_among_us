@@ -7,9 +7,7 @@ Para acceder al reporte completo dar [click aquí](https://github.com/mauricioal
 
 ## Pasos
 ### 1. Obtención de los datos [(click)](https://github.com/mauricioalvaradoo/sentiment_analysis_among_us/blob/master/1.%20Data.py)
-Para el entrenamiento de los modelos se necesitó el dataset traducido del Corpus Stanford Sentiment Treebank (SST-2). Con esos mismos datos se realizó el testeo.
-
-Además, aunque para el final, se necesita los comentarios que se clasificarán.
+Para el entrenamiento y testeo de los modelos se necesitó el dataset traducido del Corpus Stanford Sentiment Treebank (SST-2). Además, aunque para el final, se necesita los comentarios de Among Us que se clasificarán. Ambos se obtendrán al inicio.
 
 
 ### 2. Creación y comparación de modelos [(click)](https://github.com/mauricioalvaradoo/sentiment_analysis_among_us/blob/master/2.%20Models.py)
